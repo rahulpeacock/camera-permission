@@ -1,6 +1,7 @@
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import type { PermissionQueryError, PermissionQueryErrorType } from '@/lib/types';
 import React from 'react';
+import { MicrophonePrompt } from './microphone-prompt';
 
 const PERMISSION_NAME = 'microphone' as PermissionName;
 
@@ -14,21 +15,11 @@ export function MicrophonePermission() {
     if (!effectRan.current) {
       async function getMicrophonePermission() {
         try {
-          const _localPermission = await navigator.permissions.query({ name: PERMISSION_NAME });
-          console.log('localPermission: ', _localPermission);
-          setPermissionState(_localPermission.state);
+          const _localPermissionStatus = await navigator.permissions.query({ name: PERMISSION_NAME });
+          setPermissionState(_localPermissionStatus.state);
 
-          if (_localPermission.state === 'granted') {
-            // OK - Access has been granted to the microphone
-          } else if (_localPermission.state === 'denied') {
-            // KO - Access has been denied. Microphone can't be used
-          } else {
-            // _localPermission should be asked
-          }
-
-          _localPermission.onchange = (permissionS) => {
-            // React when the permission changed
-            console.log('onchange: ', permissionS);
+          _localPermissionStatus.onchange = () => {
+            setPermissionState(_localPermissionStatus.state);
           };
         } catch (err) {
           let type: PermissionQueryErrorType = 'UNKNOWN';
@@ -81,6 +72,7 @@ export function MicrophonePermission() {
       <div>
         <h2>Permission Prompt</h2>
         <p>Button for permission prompt</p>
+        <MicrophonePrompt />
       </div>
     );
   }
@@ -94,10 +86,18 @@ export function MicrophonePermission() {
     );
   }
 
-  // permissionState === 'denied'
+  if (permissionState === 'denied') {
+    return (
+      <div>
+        <h2>Permission Denied</h2>
+        <p>UI for permission denied</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <p>Microphone Permission</p>
+      <p>Microphone Permission unhandled by internal team</p>
     </div>
   );
 }

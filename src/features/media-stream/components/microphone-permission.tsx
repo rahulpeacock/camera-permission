@@ -24,16 +24,16 @@ export function MicrophonePermission() {
         } catch (err) {
           let type: PermissionQueryErrorType = 'UNKNOWN';
           if (err instanceof DOMException) {
-            console.log('[ERROR] at (getMicrophonePermission) of type DOMException: ', err.name);
+            console.log('[ERROR] at function.getMicrophonePermission in component.MicrophonePermission of type.DOMException: ', err.name);
             switch (err.name) {
               case 'InvalidStateError':
                 type = 'INVALID_STATE_ERROR';
             }
           } else if (err instanceof TypeError) {
-            console.log('[ERROR] at (getMicrophonePermission) of type TypeError: ', err.name);
+            console.log('[ERROR] at function.getMicrophonePermission in component.MicrophonePermission of type.TypeError: ', err.name);
             type = 'TYPE_ERROR';
           } else {
-            console.log('[ERROR] at (getMicrophonePermission) of type unknown: ', err);
+            console.log('[ERROR] at function.getMicrophonePermission in component.MicrophonePermission of type.unknown: ', err);
             type = 'UNKNOWN';
           }
           setPermissionError({ isError: true, type });
@@ -70,8 +70,6 @@ export function MicrophonePermission() {
   if (permissionState === 'prompt') {
     return (
       <div>
-        <h2>Permission Prompt</h2>
-        <p>Button for permission prompt</p>
         <MicrophonePrompt />
       </div>
     );

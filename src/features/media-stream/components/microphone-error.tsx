@@ -9,23 +9,71 @@ export function MicrophoneError({ type }: MicrophoneErrorProps) {
     return (
       <div>
         <h2>Abort error when accessing microphone</h2>
-        <p>
-          It happened because the browser the microphone request due to denied permissions or a resource conflict, but rest assured the app is still
-          working and can retry audio capture immediately. To resolve this, please open your browser's permission settings to allow microphone access,
-          close any other apps that might be using the microphone, reload the page, and try again.
-        </p>
       </div>
     );
   }
 
+  if (type === 'INVALID_STATE_ERROR') {
+    return (
+      <div>
+        <h2>Invalid state error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  if (type === 'NOT_ALLOWED_ERROR') {
+    return (
+      <div>
+        <h2>Not allowed error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  if (type === 'NOT_FOUND_ERROR') {
+    return (
+      <div>
+        <h2>Not found error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  if (type === 'NOT_READABLE_ERROR') {
+    return (
+      <div>
+        <h2>Not readable error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  if (type === 'OVER_CONSTRAINED_ERROR') {
+    return (
+      <div>
+        <h2>Not readable error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  if (type === 'SECURITY_ERROR') {
+    return (
+      <div>
+        <h2>Not readable error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  if (type === 'TYPE_ERROR') {
+    return (
+      <div>
+        <h2>Not readable error when accessing microphone</h2>
+      </div>
+    );
+  }
+
+  // type === 'UNKNOWN'
   return (
     <div>
-      <h2>Not readable error when accessing microphone</h2>
-      <p>
-        It happened because your microphone was busy or not responding, but don't worry—the app is still running and can try again. To get back on
-        track, please close any other program that might be using your mic, ensure your microphone is properly connected and unmuted, then reload the
-        page and retry. Ask ChatGPT
-      </p>
+      <h2>Unknown error when accessing microphone</h2>
+      <p>Microphone error unhandled by internal team</p>
     </div>
   );
 }

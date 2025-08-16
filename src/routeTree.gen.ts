@@ -8,10 +8,18 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+
+// Create Virtual Routes
+
+const MicrophonePermissionIndexLazyImport = createFileRoute(
+  '/microphone-permission/',
+)()
 
 // Create/Update Routes
 
@@ -20,6 +28,15 @@ const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
+
+const MicrophonePermissionIndexLazyRoute =
+  MicrophonePermissionIndexLazyImport.update({
+    id: '/microphone-permission/',
+    path: '/microphone-permission/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./routes/microphone-permission/index.lazy').then((d) => d.Route),
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -32,6 +49,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/microphone-permission/': {
+      id: '/microphone-permission/'
+      path: '/microphone-permission'
+      fullPath: '/microphone-permission'
+      preLoaderRoute: typeof MicrophonePermissionIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +63,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/microphone-permission': typeof MicrophonePermissionIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/microphone-permission': typeof MicrophonePermissionIndexLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/microphone-permission/': typeof MicrophonePermissionIndexLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/microphone-permission'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/microphone-permission'
+  id: '__root__' | '/' | '/microphone-permission/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MicrophonePermissionIndexLazyRoute: typeof MicrophonePermissionIndexLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MicrophonePermissionIndexLazyRoute: MicrophonePermissionIndexLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +106,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/microphone-permission/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/microphone-permission/": {
+      "filePath": "microphone-permission/index.lazy.tsx"
     }
   }
 }

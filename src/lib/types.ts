@@ -28,3 +28,10 @@ export type PermissionError =
       isError: true;
       type: PermissionErrorType;
     };
+
+export type AudioEnumerateDevicesErrorType = {
+  type: 'FAILED_TO_GET_DEVICES';
+};
+
+export type FileWithUrl = File & { url: string };
+export type RecordingStatus = 'TO-RECORD' | 'RECORDING' | 'RECORDED';

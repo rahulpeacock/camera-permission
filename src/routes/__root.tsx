@@ -1,4 +1,4 @@
-import { QueryProvider } from '@/client/providers/query-provider';
+import { QueryDevTools, QueryProvider } from '@/client/providers/query-provider';
 import { TanStackRouterDevtools } from '@/client/providers/router-devtools';
 import { ThemeProvider } from '@/client/providers/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
@@ -32,6 +32,7 @@ function RootRouteComponent() {
         <QueryProvider>
           <Outlet />
           <Toaster />
+          <QueryDevTools />
         </QueryProvider>
       </ThemeProvider>
       <React.Suspense>

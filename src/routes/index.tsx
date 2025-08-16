@@ -1,15 +1,19 @@
-import { MicrophonePermission } from '@/features/media-stream/components/microphone-permission';
+import { Button } from '@/components/ui/button';
 import type {} from '@/lib/types';
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
-  component: Index,
+  component: RouteComponent,
 });
 
-function Index() {
+function RouteComponent() {
   return (
-    <div>
-      <MicrophonePermission />
-    </div>
+    <section className='min-h-screen flex items-start justify-center py-8'>
+      <div>
+        <Button asChild>
+          <Link to='/microphone-permission'>Micorphone permission</Link>
+        </Button>
+      </div>
+    </section>
   );
 }

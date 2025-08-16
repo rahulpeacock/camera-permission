@@ -5,8 +5,6 @@ import { MicrophoneDenied } from './microphone-denied';
 import { MicrophoneGranted } from './microphone-granted';
 import { MicrophonePrompt } from './microphone-prompt';
 
-const PERMISSION_NAME = 'microphone' as PermissionName;
-
 export function MicrophonePermission() {
   const [permissionLoading, setPermissionLoading] = React.useState(true);
   const [permissionState, setPermissionState] = React.useState<PermissionState>('prompt');
@@ -17,7 +15,7 @@ export function MicrophonePermission() {
     if (!effectRan.current) {
       async function getMicrophonePermission() {
         try {
-          const _localPermissionStatus = await navigator.permissions.query({ name: PERMISSION_NAME });
+          const _localPermissionStatus = await navigator.permissions.query({ name: 'microphone' });
           setPermissionState(_localPermissionStatus.state);
 
           _localPermissionStatus.onchange = () => {
@@ -52,9 +50,8 @@ export function MicrophonePermission() {
   if (permissionLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
-        <div className='flex items-center justify-center gap-4'>
-          <SemiCircularLoader />
-          <p className='font-medium text-neutral-700'>Accessing Microphone</p>
+        <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 w-full max-w-[560px] rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
+          <SemiCircularLoader className='size-4' /> <p>Accessing Microphone...</p>
         </div>
       </div>
     );

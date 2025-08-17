@@ -20,14 +20,13 @@ export function MicrophoneError({ type }: MicrophoneErrorProps) {
       <Alert variant='destructive' className='max-w-[560px] rounded-xl bg-gray-50'>
         <AlertCircleIcon />
         <AlertTitle>Microphone Access Unavailable</AlertTitle>
-        <AlertDescription>We couldn't check your microphone permission because this page is no longer active.</AlertDescription>
-        <div className='col-start-2 text-foreground pt-3'>
-          <h3 className='font-medium'>What you can do:</h3>
+        <AlertDescription className='!text-foreground'>
+          <p>We couldn't check your microphone permission because this page is no longer active. What you can do</p>
           <ul className='list-disc pl-5 text-foreground/70 space-y-1 pt-1'>
             <li>Make sure you're on the correct tab or window.</li>
             <li>Reload the page and try again.</li>
           </ul>
-        </div>
+        </AlertDescription>
       </Alert>
     );
   }
@@ -77,7 +76,9 @@ export function MicrophoneError({ type }: MicrophoneErrorProps) {
       <Alert variant='destructive' className='max-w-[560px] rounded-xl bg-gray-50'>
         <AlertCircleIcon />
         <AlertTitle>Invalid Permission</AlertTitle>
-        <AlertDescription>The requested permission type is not supported. Please check the permission name used in your code.</AlertDescription>
+        <AlertDescription className='!text-foreground'>
+          The requested permission type is not supported. Please check the permission name used in your code.
+        </AlertDescription>
       </Alert>
     );
   }
@@ -87,7 +88,7 @@ export function MicrophoneError({ type }: MicrophoneErrorProps) {
     <Alert variant='destructive' className='max-w-[560px] rounded-xl bg-gray-50'>
       <AlertCircleIcon />
       <AlertTitle>Unknown Error</AlertTitle>
-      <AlertDescription>
+      <AlertDescription className='!text-foreground'>
         An unexpected issue occurred while requesting microphone access. Please try again, or check your browser and device settings.
       </AlertDescription>
     </Alert>

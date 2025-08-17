@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { convertToWav, downloadFile } from '@/features/media-stream/utils';
 import type { FileWithUrl, RecordingStatus } from '@/lib/types';
+import { useBlocker } from '@tanstack/react-router';
 import { CirclePause, CirclePlay, CircleStop, Download, Mic, RotateCw } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
@@ -172,6 +173,17 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
       }
     };
   }, []);
+
+  useBlocker({
+    shouldBlockFn: () => {
+      if (recordingStatus === 'RECORDING' || recordingStatus === 'RECORDED') {
+        const shouldLeave = confirm('Are you sure you want to leave, your recording will be lost?');
+        return !shouldLeave;
+      }
+      return false;
+    },
+    enableBeforeUnload: recordingStatus === 'RECORDING' || recordingStatus === 'RECORDED',
+  });
 
   if (recordingStatus === 'RECORDED') {
     return (

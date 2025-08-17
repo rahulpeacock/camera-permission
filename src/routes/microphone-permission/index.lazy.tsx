@@ -8,7 +8,9 @@ export const Route = createLazyFileRoute('/microphone-permission/')({
 function RouteComponent() {
   return (
     <div>
-      <MicrophonePermission />
+      <div className='min-h-screen flex items-center justify-center'>
+        <MicrophonePermission />
+      </div>
     </div>
   );
 }

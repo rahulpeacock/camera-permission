@@ -187,102 +187,97 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
 
   if (recordingStatus === 'RECORDED') {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <Card className='relative w-full max-w-[560px] bg-gray-50 rounded-3xl'>
-          <CardHeader>
-            <CardTitle>
-              <h2 className='font-semibold text-lg'>Download Recording</h2>
-            </CardTitle>
-            <CardDescription>
-              <p className='text-muted-foreground text-sm'>Save your recorded audio to your device for future use or sharing.</p>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-2'>
-              <Label htmlFor='recording-name'>File name</Label>
-              <Input
-                id='recording-name'
-                className='rounded-[10px]'
-                placeholder='Enter a name for your recording'
-                value={recordingName}
-                onChange={(e) => setRecordingName(e.target.value)}
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className='grid grid-cols-2 gap-2 w-full'>
-              <Button size='lg' className='rounded-xl' variant='outline' onClick={handleRerecord}>
-                <RotateCw className='size-5' /> Re-record
-              </Button>
-              <Button size='lg' className='rounded-xl w-full' onClick={handleDownload}>
-                <Download className='size-5' /> Download
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
+      <Card className='relative w-full max-w-[560px] bg-gray-50 rounded-3xl'>
+        <CardHeader>
+          <CardTitle>
+            <h2 className='font-semibold text-lg'>Download Recording</h2>
+          </CardTitle>
+          <CardDescription>
+            <p className='text-muted-foreground text-sm'>Save your recorded audio to your device for future use or sharing.</p>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className='space-y-2'>
+            <Label htmlFor='recording-name'>File name</Label>
+            <Input
+              id='recording-name'
+              className='rounded-[10px]'
+              placeholder='Enter a name for your recording'
+              value={recordingName}
+              onChange={(e) => setRecordingName(e.target.value)}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <div className='grid grid-cols-2 gap-2 w-full'>
+            <Button size='lg' className='rounded-xl' variant='outline' onClick={handleRerecord}>
+              <RotateCw className='size-5' /> Re-record
+            </Button>
+            <Button size='lg' className='rounded-xl w-full' onClick={handleDownload}>
+              <Download className='size-5' /> Download
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     );
   }
 
   if (recordingStatus === 'RECORDING') {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <Card className='relative w-full max-w-[560px] bg-gray-50 rounded-3xl'>
-          <CardHeader>
-            <CardTitle>
-              <h2 className='font-semibold text-lg'>Recording Audio</h2>
-            </CardTitle>
-            <CardDescription>
-              <p className='text-muted-foreground text-sm'>Your voice is being captured. Speak clearly and press Stop when you are done.</p>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* TODO: add recording-time */}
-            <div className='bg-gray-100 rounded-2xl p-3 space-y-3'>
-              <div className='flex items-center justify-between px-1 text-sm'>
-                <div className='flex items-center justify-center gap-2.5'>
-                  {isPauseRecording ? (
-                    <React.Fragment>
-                      <span className='relative flex size-3'>
-                        <span className='relative inline-flex size-3 rounded-full bg-gray-400' />
-                      </span>
-                      <p className='text-muted-foreground'>Paused</p>
-                    </React.Fragment>
-                  ) : (
-                    <React.Fragment>
-                      <span className='relative flex size-3'>
-                        <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75' />
-                        <span className='relative inline-flex size-3 rounded-full bg-sky-500' />
-                      </span>
-                      <p className='text-sky-500'>Recording</p>
-                    </React.Fragment>
-                  )}
-                </div>
-                <MicrophoneTimer startTimer={startTimer} />
+      <Card className='relative w-full max-w-[560px] rounded-3xl'>
+        <CardHeader>
+          <CardTitle>
+            <h2 className='font-semibold text-lg'>Recording Audio</h2>
+          </CardTitle>
+          <CardDescription>
+            <p className='text-muted-foreground text-sm'>Your voice is being captured. Speak clearly and press Stop when you are done.</p>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className='bg-gray-100 rounded-2xl p-1 space-y-2.5 border'>
+            <div className='flex items-center justify-between px-2.5 pt-1.5 text-sm'>
+              <div className='flex items-center justify-center gap-2.5'>
+                {isPauseRecording ? (
+                  <React.Fragment>
+                    <span className='relative flex size-3'>
+                      <span className='relative inline-flex size-3 rounded-full bg-gray-400' />
+                    </span>
+                    <p className='text-muted-foreground'>Paused</p>
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    <span className='relative flex size-3'>
+                      <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75' />
+                      <span className='relative inline-flex size-3 rounded-full bg-sky-500' />
+                    </span>
+                    <p className='text-sky-500'>Recording</p>
+                  </React.Fragment>
+                )}
               </div>
-              <div className='bg-white p-2 rounded-xl border'>
-                <AudioWaveform analyserNode={analyserNode} isPaused={isPauseRecording} />
-              </div>
+              <MicrophoneTimer startTimer={startTimer} />
             </div>
-          </CardContent>
-          <CardFooter>
-            <div className='grid grid-cols-2 gap-2 w-full'>
-              {isPauseRecording ? (
-                <Button size='lg' className='rounded-xl' variant='outline' onClick={handleResumeRecording}>
-                  <CirclePlay className='size-5' /> Resume
-                </Button>
-              ) : (
-                <Button size='lg' className='rounded-xl' variant='outline' onClick={handlePauseRecording}>
-                  <CirclePause className='size-5' /> Pause
-                </Button>
-              )}
-              <Button size='lg' className='rounded-xl' variant='outline' onClick={handleStopRecording}>
-                <CircleStop className='size-5' /> Stop
+            <div className='bg-white p-2 rounded-xl'>
+              <AudioWaveform analyserNode={analyserNode} isPaused={isPauseRecording} />
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <div className='grid grid-cols-2 gap-2 w-full'>
+            {isPauseRecording ? (
+              <Button size='lg' className='rounded-xl' variant='outline' onClick={handleResumeRecording}>
+                <CirclePlay className='size-5' /> Resume
               </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
+            ) : (
+              <Button size='lg' className='rounded-xl' variant='outline' onClick={handlePauseRecording}>
+                <CirclePause className='size-5' /> Pause
+              </Button>
+            )}
+            <Button size='lg' className='rounded-xl' variant='outline' onClick={handleStopRecording}>
+              <CircleStop className='size-5' /> Stop
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     );
   }
 

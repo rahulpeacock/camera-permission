@@ -59,10 +59,8 @@ export function MicrophonePrompt() {
 
   if (promptLoading) {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 w-full max-w-[560px] rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
-          <SemiCircularLoader className='size-4' /> <p>Requesting Microphone...</p>
-        </div>
+      <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 w-full max-w-[560px] rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
+        <SemiCircularLoader className='size-4' /> <p>Requesting Microphone...</p>
       </div>
     );
   }
@@ -72,24 +70,22 @@ export function MicrophonePrompt() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center'>
-      <Card className='relative w-full max-w-[560px] bg-gray-50 rounded-3xl'>
-        <CardHeader>
-          <CardTitle>
-            <h2 className='font-semibold text-lg'>Microphone Access</h2>
-          </CardTitle>
-          <CardDescription>
-            <p className='text-muted-foreground text-sm'>Allow the app to use your microphone so you can record and interact seamlessly.</p>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <Button size='lg' className='rounded-xl w-full' onClick={handleClick}>
-              <Mic className='size-5' /> Enable microphone
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Card className='relative w-full max-w-[560px] bg-gray-50 rounded-3xl'>
+      <CardHeader>
+        <CardTitle>
+          <h2 className='font-semibold text-lg'>Microphone Access</h2>
+        </CardTitle>
+        <CardDescription>
+          <p className='text-muted-foreground text-sm'>Allow the app to use your microphone so you can record and interact seamlessly.</p>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div>
+          <Button size='lg' className='rounded-xl w-full' onClick={handleClick}>
+            <Mic className='size-5' /> Enable microphone
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

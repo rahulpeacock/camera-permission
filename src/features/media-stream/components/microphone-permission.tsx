@@ -1,7 +1,9 @@
+import {} from '@/components/ui/card';
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import type { PermissionQueryError, PermissionQueryErrorType } from '@/lib/types';
 import React from 'react';
 import { MicrophoneDenied } from './microphone-denied';
+import { MicrophoneError } from './microphone-error';
 import { MicrophoneGranted } from './microphone-granted';
 import { MicrophonePrompt } from './microphone-prompt';
 
@@ -49,21 +51,14 @@ export function MicrophonePermission() {
 
   if (permissionLoading) {
     return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 w-full max-w-[560px] rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
-          <SemiCircularLoader className='size-4' /> <p>Accessing Microphone...</p>
-        </div>
+      <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 w-full max-w-[560px] rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
+        <SemiCircularLoader className='size-4' /> <p>Accessing Microphone...</p>
       </div>
     );
   }
 
   if (permissionError.isError) {
-    return (
-      <div>
-        <h2>Permission Error</h2>
-        <p>Manage the permission error</p>
-      </div>
-    );
+    return <MicrophoneError type={permissionError.type} />;
   }
 
   if (permissionState === 'prompt') {
@@ -74,13 +69,6 @@ export function MicrophonePermission() {
     return <MicrophoneGranted />;
   }
 
-  if (permissionState === 'denied') {
-    return <MicrophoneDenied />;
-  }
-
-  return (
-    <div>
-      <p>Microphone Permission unhandled by internal team</p>
-    </div>
-  );
+  // permissionState === 'denied'
+  return <MicrophoneDenied />;
 }

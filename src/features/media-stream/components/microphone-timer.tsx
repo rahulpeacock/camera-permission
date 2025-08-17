@@ -12,7 +12,6 @@ export const MicrophoneTimer = React.memo(({ startTimer }: MicrophoneTimerProps)
   React.useEffect(() => {
     if (startTimer) {
       intervalRef.current = setInterval(() => {
-        console.log('updating timer');
         setTime((curr) => curr + 1);
       }, 1000);
     } else {

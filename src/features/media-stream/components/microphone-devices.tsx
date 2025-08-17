@@ -8,7 +8,9 @@ import type { FileWithUrl, RecordingStatus } from '@/lib/types';
 import { CirclePause, CirclePlay, CircleStop, Download, Mic, RotateCw } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
+import { AudioWaveform } from './audio-waveform';
 import { MicrophoneGrantedLayout } from './microphone-granted-layout';
+import { MicrophoneTimer } from './microphone-timer';
 
 interface MicrophoneDeviceProps {
   devices: MediaDeviceInfo[];
@@ -18,14 +20,44 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
   const [file, setFile] = React.useState<FileWithUrl | null>(null);
   const [recordingName, setRecordingName] = React.useState<string>('');
   const [isPauseRecording, setIsPauseRecording] = React.useState(false);
+  const [startTimer, setStartTimer] = React.useState(false);
+  const [analyserNode, setAnalyserNode] = React.useState<AnalyserNode | null>(null);
   const [recordingStatus, setRecordingStatus] = React.useState<RecordingStatus>('TO-RECORD');
-  const [defaultDeviceId, setDefaultDeviceId] = React.useState<string | undefined>(undefined);
+  const [defaultDeviceId, setDefaultDeviceId] = React.useState<string>(devices[0].deviceId);
 
   const chunksRef = React.useRef<Blob[]>([]);
   const streamRef = React.useRef<MediaStream | null>(null);
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const analyserRef = React.useRef<AnalyserNode | null>(null);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
 
-  async function handleStartRecording() {
+  const cleanup = React.useCallback(() => {
+    if (streamRef.current) {
+      const audioTracks = streamRef.current.getAudioTracks();
+      for (const track of audioTracks) {
+        track.stop();
+      }
+      streamRef.current = null;
+    }
+    if (mediaRecorderRef.current) {
+      if (mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      mediaRecorderRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    if (analyserRef.current) {
+      analyserRef.current.disconnect();
+      analyserRef.current = null;
+    }
+    setAnalyserNode(null);
+  }, []);
+
+  const handleStartRecording = React.useCallback(async () => {
+    cleanup();
     try {
       const _stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -44,6 +76,17 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
       });
       mediaRecorderRef.current = mediaRecorder;
 
+      // biome-ignore lint/suspicious/noExplicitAny: intended behaviour
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      const source = audioContext.createMediaStreamSource(_stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+      setAnalyserNode(analyser);
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
@@ -52,66 +95,72 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const audioContext = new AudioContext();
-        const audioBuffer = await audioContext.decodeAudioData(await audioBlob.arrayBuffer());
-        const wavBlob = convertToWav(audioBuffer);
+
+        const wavBlob = await convertToWav(audioBlob);
         const wavFile = new File([wavBlob], 'Live recording.wav', { type: 'audio/wav' });
 
         const url = URL.createObjectURL(wavFile);
         const fileWithUrl = Object.assign(wavFile, { url: url });
-
         setFile(fileWithUrl);
-        streamRef.current = null;
-        chunksRef.current = [];
-        mediaRecorderRef.current = null;
       };
       mediaRecorder.start(1000);
       setRecordingStatus('RECORDING');
+      setStartTimer(true);
       toast.info('Recording started');
     } catch (err) {
       // TODO: update the error-handling
-      chunksRef.current = [];
       console.log('Error: ', err);
+      cleanup();
     }
-  }
+  }, [defaultDeviceId, cleanup]);
 
-  function handlePauseRecording() {
-    setIsPauseRecording((curr) => !curr);
-    if (mediaRecorderRef.current) {
-      if (isPauseRecording) {
-        mediaRecorderRef.current.resume();
-        toast.info('Recording resumed');
-      } else {
-        mediaRecorderRef.current.pause();
-        toast.info('Recording paused');
-      }
+  const handlePauseRecording = React.useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      setIsPauseRecording(true);
+      setStartTimer(false);
+      mediaRecorderRef.current.pause();
+      toast.info('Recording paused');
     }
-  }
+  }, []);
 
-  function handleStopRecording() {
-    if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
+  const handleResumeRecording = React.useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
+      setIsPauseRecording(false);
+      setStartTimer(true);
+      mediaRecorderRef.current.resume();
+      toast.info('Recording resumed');
+    }
+  }, []);
+
+  const handleStopRecording = React.useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
     if (streamRef.current) {
       const audioTracks = streamRef.current.getAudioTracks();
       for (const track of audioTracks) {
         track.stop();
       }
     }
+    setStartTimer(false);
     setRecordingStatus('RECORDED');
     setIsPauseRecording(false);
     toast.info('Recording stopped');
-  }
+  }, []);
 
-  function handleRerecord() {
+  const handleRerecord = React.useCallback(() => {
+    cleanup();
     setRecordingStatus('TO-RECORD');
     setFile(null);
     setRecordingName('');
-  }
+    chunksRef.current = [];
+  }, [cleanup]);
 
-  function handleDownload() {
+  const handleDownload = React.useCallback(() => {
     if (!file) return;
     downloadFile(file.url, `${recordingName.length > 0 ? `${recordingName}.wav` : 'Live recording.wav'}`);
     toast.info('Recording downloaded');
-  }
+  }, [file, recordingName]);
 
   React.useEffect(() => {
     return () => {
@@ -141,6 +190,7 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
               <Label htmlFor='recording-name'>File name</Label>
               <Input
                 id='recording-name'
+                className='rounded-[10px]'
                 placeholder='Enter a name for your recording'
                 value={recordingName}
                 onChange={(e) => setRecordingName(e.target.value)}
@@ -175,24 +225,45 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* TODO: add recording-time and animation */}
-            <div>
-              <p>Recording</p>
+            {/* TODO: add recording-time */}
+            <div className='bg-gray-100 rounded-2xl p-3 space-y-3'>
+              <div className='flex items-center justify-between px-1 text-sm'>
+                <div className='flex items-center justify-center gap-2.5'>
+                  {isPauseRecording ? (
+                    <React.Fragment>
+                      <span className='relative flex size-3'>
+                        <span className='relative inline-flex size-3 rounded-full bg-gray-400' />
+                      </span>
+                      <p className='text-muted-foreground'>Paused</p>
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment>
+                      <span className='relative flex size-3'>
+                        <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75' />
+                        <span className='relative inline-flex size-3 rounded-full bg-sky-500' />
+                      </span>
+                      <p className='text-sky-500'>Recording</p>
+                    </React.Fragment>
+                  )}
+                </div>
+                <MicrophoneTimer startTimer={startTimer} />
+              </div>
+              <div className='bg-white p-2 rounded-xl border'>
+                <AudioWaveform analyserNode={analyserNode} isPaused={isPauseRecording} />
+              </div>
             </div>
           </CardContent>
           <CardFooter>
             <div className='grid grid-cols-2 gap-2 w-full'>
-              <Button size='lg' className='rounded-xl' variant='outline' onClick={handlePauseRecording}>
-                {isPauseRecording ? (
-                  <React.Fragment>
-                    <CirclePlay className='size-5' /> Resume
-                  </React.Fragment>
-                ) : (
-                  <React.Fragment>
-                    <CirclePause className='size-5' /> Pause
-                  </React.Fragment>
-                )}
-              </Button>
+              {isPauseRecording ? (
+                <Button size='lg' className='rounded-xl' variant='outline' onClick={handleResumeRecording}>
+                  <CirclePlay className='size-5' /> Resume
+                </Button>
+              ) : (
+                <Button size='lg' className='rounded-xl' variant='outline' onClick={handlePauseRecording}>
+                  <CirclePause className='size-5' /> Pause
+                </Button>
+              )}
               <Button size='lg' className='rounded-xl' variant='outline' onClick={handleStopRecording}>
                 <CircleStop className='size-5' /> Stop
               </Button>

@@ -1,4 +1,7 @@
-export const convertToWav = (audioBuffer: AudioBuffer) => {
+export const convertToWav = async (audioBlob: Blob) => {
+  const audioContext = new AudioContext();
+  const audioBuffer = await audioContext.decodeAudioData(await audioBlob.arrayBuffer());
+
   const numOfChannels = 1;
   const length = audioBuffer.length * numOfChannels * 2;
   const buffer = new ArrayBuffer(44 + length);
@@ -55,4 +58,15 @@ export const downloadFile = (url: string, filename: string) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+export const getDuration = (totalSeconds: number) => {
+  const seconds = Math.floor(totalSeconds % 60);
+  const minutes = Math.floor((totalSeconds / 60) % 60);
+  const hours = Math.floor(totalSeconds / 3600);
+
+  if (hours > 0) {
+    return `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
+  return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };

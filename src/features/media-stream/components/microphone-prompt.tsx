@@ -60,7 +60,7 @@ export function MicrophonePrompt() {
   if (promptLoading) {
     return (
       <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 w-full max-w-[560px] rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
-        <SemiCircularLoader className='size-4' /> <p>Requesting Microphone...</p>
+        <SemiCircularLoader className='size-4' /> <p>Requesting Microphone</p>
       </div>
     );
   }

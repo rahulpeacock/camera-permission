@@ -1,6 +1,7 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { PermissionErrorType } from '@/lib/types';
-import { AlertCircleIcon } from 'lucide-react';
+import { AlertCircleIcon, SquareArrowOutUpRight } from 'lucide-react';
+import { getChangeMicrophonePermissionLink } from '../utils';
 
 interface MicrophoneErrorProps {
   type: PermissionErrorType;
@@ -59,6 +60,14 @@ export function MicrophoneError({ type }: MicrophoneErrorProps) {
               You've denied access to the microphone. To continue, please allow microphone access in your browser settings. If you need help resetting
               permissions, check this guide:
             </p>
+            <a
+              className='flex items-center justify-start gap-1.5 pt-2 text-blue-500 hover:underline'
+              href={getChangeMicrophonePermissionLink()}
+              target='_blank'
+              rel='noreferrer'
+            >
+              How to reset microphone permission? <SquareArrowOutUpRight size={14} />
+            </a>
           </CardDescription>
         </CardHeader>
       </Card>

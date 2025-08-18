@@ -1,3 +1,5 @@
+import { getBrowserName } from '@/lib/utils';
+
 export const convertToWav = async (audioBlob: Blob) => {
   const audioContext = new AudioContext();
   const audioBuffer = await audioContext.decodeAudioData(await audioBlob.arrayBuffer());
@@ -69,4 +71,22 @@ export const getDuration = (totalSeconds: number) => {
     return `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   }
   return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
+
+export const getChangeMicrophonePermissionLink = () => {
+  const browserName = getBrowserName();
+
+  if (browserName === 'Chrome') {
+    return 'https://support.google.com/chrome/answer/114662';
+  }
+  if (browserName === 'Firefox') {
+    return 'https://support.mozilla.org/en-US/kb/how-manage-your-camera-and-microphone-permissions';
+  }
+  if (browserName === 'Safari') {
+    return 'https://support.apple.com/en-in/guide/safari/ibrwe2159f50/mac';
+  }
+  if (browserName === 'Edge') {
+    return 'https://learn.microsoft.com/en-us/answers/questions/2374559/microsoft-edge-microphone';
+  }
+  return 'https://support.google.com/chrome/answer/3200662?hl=en';
 };

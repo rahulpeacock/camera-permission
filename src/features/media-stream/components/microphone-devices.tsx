@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SemiCircularLoader } from '@/features/global/components/loader';
 import { convertToWav, downloadFile } from '@/features/media-stream/utils';
 import type { FileWithUrl, RecordingStatus } from '@/lib/types';
 import { useBlocker } from '@tanstack/react-router';
@@ -19,6 +20,7 @@ interface MicrophoneDeviceProps {
 
 export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
   const [file, setFile] = React.useState<FileWithUrl | null>(null);
+  const [loadingStream, setLoadingStream] = React.useState(false);
   const [recordingName, setRecordingName] = React.useState<string>('');
   const [isPauseRecording, setIsPauseRecording] = React.useState(false);
   const [startTimer, setStartTimer] = React.useState(false);
@@ -59,6 +61,7 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
 
   const handleStartRecording = React.useCallback(async () => {
     cleanup();
+    setLoadingStream(true);
     try {
       const _stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -112,6 +115,8 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
       // TODO: update the error-handling
       console.log('Error: ', err);
       cleanup();
+    } finally {
+      setLoadingStream(false);
     }
   }, [defaultDeviceId, cleanup]);
 
@@ -302,8 +307,8 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button size='lg' className='rounded-xl w-full' onClick={handleStartRecording}>
-          <Mic className='size-5' /> Start recording
+        <Button size='lg' className='rounded-xl w-full' onClick={handleStartRecording} disabled={loadingStream}>
+          {loadingStream ? <SemiCircularLoader className='size-5' /> : <Mic className='size-5' />} Start recording
         </Button>
       </CardFooter>
     </MicrophoneGrantedLayout>

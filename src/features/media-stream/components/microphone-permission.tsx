@@ -2,7 +2,6 @@ import {} from '@/components/ui/card';
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import type { PermissionQueryError, PermissionQueryErrorType } from '@/lib/types';
 import React from 'react';
-import { MicrophoneDenied } from './microphone-denied';
 import { MicrophoneError } from './microphone-error';
 import { MicrophoneGranted } from './microphone-granted';
 import { MicrophonePrompt } from './microphone-prompt';
@@ -70,5 +69,5 @@ export function MicrophonePermission() {
   }
 
   // permissionState === 'denied'
-  return <MicrophoneDenied />;
+  return <MicrophoneError type='NOT_ALLOWED_ERROR' />;
 }

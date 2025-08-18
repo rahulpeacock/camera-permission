@@ -10,7 +10,7 @@ export const app = {
     if (res.isErr()) {
       return err({ type: 'FAILED_TO_GET_DEVICES' });
     }
-    const audioDevices = res.value.filter((device) => device.kind === 'audioinput');
+    const audioDevices = res.value.filter((device) => device.kind === 'audioinput' && device.deviceId !== 'communications');
     return ok(audioDevices);
   },
 };

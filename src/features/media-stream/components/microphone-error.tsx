@@ -1,10 +1,11 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { PermissionErrorType } from '@/lib/types';
-import { AlertCircleIcon, SquareArrowOutUpRight } from 'lucide-react';
+import { ErrorIcon } from '@/features/global/components/error-icon';
+import type { MediaStreamErrorType, PermissionErrorType } from '@/lib/types';
+import { SquareArrowOutUpRight } from 'lucide-react';
 import { getChangeMicrophonePermissionLink } from '../utils';
 
 interface MicrophoneErrorProps {
-  type: PermissionErrorType;
+  type: PermissionErrorType | MediaStreamErrorType;
 }
 
 export function MicrophoneError({ type }: MicrophoneErrorProps) {
@@ -182,13 +183,5 @@ export function MicrophoneError({ type }: MicrophoneErrorProps) {
         </CardDescription>
       </CardHeader>
     </Card>
-  );
-}
-
-function ErrorIcon() {
-  return (
-    <div className='size-9 rounded-lg bg-destructive/10 flex items-center justify-center'>
-      <AlertCircleIcon className='text-destructive' size={18} />
-    </div>
   );
 }

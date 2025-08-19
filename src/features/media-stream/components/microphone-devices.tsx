@@ -5,12 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import { convertToWav, downloadFile } from '@/features/media-stream/utils';
-import type { FileWithUrl, RecordingStatus } from '@/lib/types';
+import type { FileWithUrl, MediaRecorderErrorType, MediaStreamError, MediaStreamErrorType, RecordingStatus, TMediaRecorderError } from '@/lib/types';
 import { useBlocker } from '@tanstack/react-router';
 import { CirclePause, CirclePlay, CircleStop, Download, Mic, RotateCw } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 import { AudioWaveform } from './audio-waveform';
+import { MediaRecorderError } from './media-recorder-error';
+import { MicrophoneError } from './microphone-error';
 import { MicrophoneGrantedLayout } from './microphone-granted-layout';
 import { MicrophoneTimer } from './microphone-timer';
 
@@ -21,6 +23,8 @@ interface MicrophoneDeviceProps {
 export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
   const [file, setFile] = React.useState<FileWithUrl | null>(null);
   const [loadingStream, setLoadingStream] = React.useState(false);
+  const [streamError, setStreamError] = React.useState<MediaStreamError>({ isError: false });
+  const [recorderErrro, setRecorderError] = React.useState<TMediaRecorderError>({ isError: false });
   const [recordingName, setRecordingName] = React.useState<string>('');
   const [isPauseRecording, setIsPauseRecording] = React.useState(false);
   const [startTimer, setStartTimer] = React.useState(false);
@@ -107,13 +111,64 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
         const fileWithUrl = Object.assign(wavFile, { url: url });
         setFile(fileWithUrl);
       };
+
+      mediaRecorder.onerror = (e) => {
+        let type: MediaRecorderErrorType;
+        switch (e.error.name) {
+          case 'SecurityError':
+            type = 'SECURITY_ERROR';
+            break;
+          case 'InvalidModificationError':
+            type = 'INVALID_MODIFICATION_ERROR';
+            break;
+          default:
+            type = 'UNKNOWN';
+        }
+        setRecorderError({ isError: true, type });
+        cleanup();
+      };
+
       mediaRecorder.start(1000);
       setRecordingStatus('RECORDING');
       setStartTimer(true);
       toast.info('Recording started');
     } catch (err) {
-      // TODO: update the error-handling
-      console.log('Error: ', err);
+      let type: MediaStreamErrorType;
+      if (err instanceof DOMException) {
+        console.log('[ERROR] at function.handleClick in component.MicrophonePrompt of type.DOMException: ', err.name);
+        switch (err.name) {
+          case 'AbortError':
+            type = 'ABORT_ERROR';
+            break;
+          case 'InvalidStateError':
+            type = 'INVALID_STATE_ERROR';
+            break;
+          case 'NotAllowedError':
+            type = 'NOT_ALLOWED_ERROR';
+            break;
+          case 'NotFoundError':
+            type = 'NOT_FOUND_ERROR';
+            break;
+          case 'NotReadableError':
+            type = 'NOT_READABLE_ERROR';
+            break;
+          case 'OverconstrainedError':
+            type = 'OVER_CONSTRAINED_ERROR';
+            break;
+          case 'SecurityError':
+            type = 'SECURITY_ERROR';
+            break;
+          default:
+            type = 'UNKNOWN';
+        }
+      } else if (err instanceof TypeError) {
+        console.log('[ERROR] at function.handleClick in component.MicrophonePrompt of type.TypeError: ', err.name);
+        type = 'TYPE_ERROR';
+      } else {
+        console.log('[ERROR] at function.handleClick in component.MicrophonePrompt of type.unknown: ', err);
+        type = 'UNKNOWN';
+      }
+      setStreamError({ isError: true, type });
       cleanup();
     } finally {
       setLoadingStream(false);
@@ -189,6 +244,14 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
     },
     enableBeforeUnload: recordingStatus === 'RECORDING' || recordingStatus === 'RECORDED',
   });
+
+  if (streamError.isError) {
+    return <MicrophoneError type={streamError.type} />;
+  }
+
+  if (recorderErrro.isError) {
+    return <MediaRecorderError type={recorderErrro.type} />;
+  }
 
   if (recordingStatus === 'RECORDED') {
     return (

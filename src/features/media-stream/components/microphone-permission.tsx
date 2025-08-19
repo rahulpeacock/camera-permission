@@ -1,4 +1,3 @@
-import {} from '@/components/ui/card';
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import type { PermissionQueryError, PermissionQueryErrorType } from '@/lib/types';
 import React from 'react';

@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SemiCircularLoader } from '@/features/global/components/loader';
-import type { PermissionError, PermissionErrorType } from '@/lib/types';
+import type { MediaStreamError, MediaStreamErrorType } from '@/lib/types';
 import { Mic } from 'lucide-react';
 import React from 'react';
 import { MicrophoneError } from './microphone-error';
 
 export function MicrophonePrompt() {
   const [promptLoading, setPromptLoading] = React.useState(false);
-  const [promptError, setPromptError] = React.useState<PermissionError>({ isError: false });
+  const [promptError, setPromptError] = React.useState<MediaStreamError>({ isError: false });
 
   async function handleClick() {
     try {
@@ -19,7 +19,7 @@ export function MicrophonePrompt() {
         track.stop();
       }
     } catch (err) {
-      let type: PermissionErrorType = 'UNKNOWN';
+      let type: MediaStreamErrorType;
       if (err instanceof DOMException) {
         console.log('[ERROR] at function.handleClick in component.MicrophonePrompt of type.DOMException: ', err.name);
         switch (err.name) {
@@ -43,6 +43,9 @@ export function MicrophonePrompt() {
             break;
           case 'SecurityError':
             type = 'SECURITY_ERROR';
+            break;
+          default:
+            type = 'UNKNOWN';
         }
       } else if (err instanceof TypeError) {
         console.log('[ERROR] at function.handleClick in component.MicrophonePrompt of type.TypeError: ', err.name);

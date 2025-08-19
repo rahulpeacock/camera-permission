@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { SemiCircularLoader } from '@/features/global/components/loader';
-import { getMicrophoneAudioDevicesOptions } from '@/lib/queries';
+import { getMicrophoneDevicesOptions } from '@/lib/queries';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Mic } from 'lucide-react';
 import React from 'react';
@@ -10,7 +10,7 @@ import { MicrophoneGrantedLayout } from './microphone-granted-layout';
 
 export function MicrophoneGranted() {
   const queryClient = useQueryClient();
-  const { isPending, data, isError, error } = useQuery(getMicrophoneAudioDevicesOptions());
+  const { isPending, data, isError, error } = useQuery(getMicrophoneDevicesOptions());
 
   React.useEffect(() => {
     function handleDeviceChange(e: Event) {

@@ -9,7 +9,7 @@ export type PermissionQueryError =
       type: PermissionQueryErrorType;
     };
 
-export type PermissionErrorType =
+export type MediaStreamErrorType =
   | 'ABORT_ERROR'
   | 'INVALID_STATE_ERROR'
   | 'NOT_ALLOWED_ERROR'
@@ -19,6 +19,8 @@ export type PermissionErrorType =
   | 'SECURITY_ERROR'
   | 'TYPE_ERROR'
   | 'UNKNOWN';
+export type PermissionErrorType = 'INVALID_STATE_ERROR' | 'TYPE_ERROR' | 'UNKNOWN';
+export type MediaRecorderErrorType = 'INVALID_MODIFICATION_ERROR' | 'SECURITY_ERROR' | 'UNKNOWN';
 
 export type PermissionError =
   | {
@@ -27,6 +29,24 @@ export type PermissionError =
   | {
       isError: true;
       type: PermissionErrorType;
+    };
+
+export type MediaStreamError =
+  | {
+      isError: false;
+    }
+  | {
+      isError: true;
+      type: MediaStreamErrorType;
+    };
+
+export type TMediaRecorderError =
+  | {
+      isError: false;
+    }
+  | {
+      isError: true;
+      type: MediaRecorderErrorType;
     };
 
 export type AudioEnumerateDevicesErrorType = {

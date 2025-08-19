@@ -1,9 +1,9 @@
 import { queryOptions } from '@tanstack/react-query';
 import { app } from './app';
 
-export const getMicrophoneAudioDevicesOptions = () => {
+export const getMicrophoneDevicesOptions = () => {
   return queryOptions({
-    queryKey: ['get-microphone-audio-devices'],
-    queryFn: () => app.getAudioDevices(),
+    queryKey: ['get-microphone-devices'],
+    queryFn: () => app.getMicrophoneDevices(),
   });
 };

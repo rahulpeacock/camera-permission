@@ -2,7 +2,7 @@ import { type Result, ResultAsync, err, ok } from 'neverthrow';
 import type { AudioEnumerateDevicesErrorType } from './types';
 
 export const app = {
-  getAudioDevices: async (): Promise<Result<MediaDeviceInfo[], AudioEnumerateDevicesErrorType>> => {
+  getMicrophoneDevices: async (): Promise<Result<MediaDeviceInfo[], AudioEnumerateDevicesErrorType>> => {
     const res = await ResultAsync.fromPromise(navigator.mediaDevices.enumerateDevices(), () => {
       return new Error('Failed to get media-devices');
     });

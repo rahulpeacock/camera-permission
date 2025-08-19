@@ -22,7 +22,7 @@ export function MicrophoneGranted() {
     return () => {
       navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
     };
-  }, [queryClient]);
+  }, [queryClient.invalidateQueries]);
 
   if (isPending) {
     return (
@@ -57,6 +57,7 @@ export function MicrophoneGranted() {
       </MicrophoneGrantedLayout>
     );
   }
+  console.log('data', data.value);
 
-  return <MicrophoneDevices devices={data.value} />;
+  return <MicrophoneDevices devices={data.value} defaultDevice={data.value[0]} />;
 }

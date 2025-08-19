@@ -18,9 +18,10 @@ import { MicrophoneTimer } from './microphone-timer';
 
 interface MicrophoneDeviceProps {
   devices: MediaDeviceInfo[];
+  defaultDevice: MediaDeviceInfo;
 }
 
-export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
+export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDeviceProps) {
   const [file, setFile] = React.useState<FileWithUrl | null>(null);
   const [loadingStream, setLoadingStream] = React.useState(false);
   const [streamError, setStreamError] = React.useState<MediaStreamError>({ isError: false });
@@ -30,7 +31,7 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
   const [startTimer, setStartTimer] = React.useState(false);
   const [analyserNode, setAnalyserNode] = React.useState<AnalyserNode | null>(null);
   const [recordingStatus, setRecordingStatus] = React.useState<RecordingStatus>('TO-RECORD');
-  const [defaultDeviceId, setDefaultDeviceId] = React.useState<string>(devices[0].deviceId);
+  const [defaultDeviceId, setDefaultDeviceId] = React.useState<string | null>(null);
 
   const chunksRef = React.useRef<Blob[]>([]);
   const streamRef = React.useRef<MediaStream | null>(null);
@@ -69,7 +70,7 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
     try {
       const _stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          deviceId: { exact: defaultDeviceId },
+          deviceId: { exact: defaultDeviceId ?? defaultDevice.deviceId },
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: true,
@@ -173,7 +174,7 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
     } finally {
       setLoadingStream(false);
     }
-  }, [defaultDeviceId, cleanup]);
+  }, [defaultDeviceId, defaultDevice.deviceId, cleanup]);
 
   const handlePauseRecording = React.useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -355,7 +356,7 @@ export function MicrophoneDevices({ devices }: MicrophoneDeviceProps) {
       <CardContent>
         <div className='space-y-2'>
           <Label htmlFor='select-audio-device'>Audio devices</Label>
-          <Select value={defaultDeviceId ?? devices[0].deviceId} onValueChange={setDefaultDeviceId}>
+          <Select value={defaultDeviceId ?? defaultDevice.deviceId} onValueChange={setDefaultDeviceId}>
             <SelectTrigger id='select-audio-device' className='w-full !h-10 rounded-[10px]'>
               <SelectValue placeholder='Select a device' />
             </SelectTrigger>

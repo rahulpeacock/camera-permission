@@ -15,7 +15,7 @@ export function MicrophoneGranted() {
   React.useEffect(() => {
     function handleDeviceChange(e: Event) {
       console.log('Device change event: ', e);
-      queryClient.invalidateQueries({ queryKey: ['get-microphone-audio-devices'] });
+      queryClient.invalidateQueries({ queryKey: ['get-microphone-devices'] });
     }
 
     navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
@@ -57,7 +57,6 @@ export function MicrophoneGranted() {
       </MicrophoneGrantedLayout>
     );
   }
-  console.log('data', data.value);
 
   return <MicrophoneDevices devices={data.value} defaultDevice={data.value[0]} />;
 }

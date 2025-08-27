@@ -21,6 +21,7 @@ export type MediaStreamErrorType =
   | 'UNKNOWN';
 export type PermissionErrorType = 'INVALID_STATE_ERROR' | 'TYPE_ERROR' | 'UNKNOWN';
 export type MediaRecorderErrorType = 'INVALID_MODIFICATION_ERROR' | 'SECURITY_ERROR' | 'UNKNOWN';
+export type MediaTrackErrorType = 'NO_TRACKS_FOUND' | 'TRACK_DISABLED' | 'TRACK_ENDED' | 'TRACK_MUTED';
 
 export type PermissionError =
   | {
@@ -47,6 +48,15 @@ export type TMediaRecorderError =
   | {
       isError: true;
       type: MediaRecorderErrorType;
+    };
+
+export type MediaTrackError =
+  | {
+      isError: false;
+    }
+  | {
+      isError: true;
+      type: MediaTrackErrorType;
     };
 
 export type AudioEnumerateDevicesErrorType = {

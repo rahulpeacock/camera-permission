@@ -5,9 +5,17 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import { convertToWav, downloadFile } from '@/features/media-stream/utils';
-import type { FileWithUrl, MediaRecorderErrorType, MediaStreamError, MediaStreamErrorType, RecordingStatus, TMediaRecorderError } from '@/lib/types';
+import type {
+  FileWithUrl,
+  MediaRecorderErrorType,
+  MediaStreamError,
+  MediaStreamErrorType,
+  MediaTrackError,
+  RecordingStatus,
+  TMediaRecorderError,
+} from '@/lib/types';
 import { useBlocker } from '@tanstack/react-router';
-import { CirclePause, CirclePlay, CircleStop, Download, Mic, RotateCw } from 'lucide-react';
+import { CirclePause, CirclePlay, CircleStop, Download, Mic, RotateCw, TriangleAlert } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 import { AudioWaveform } from './audio-waveform';
@@ -22,10 +30,12 @@ interface MicrophoneDeviceProps {
 }
 
 export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDeviceProps) {
+  const [tracks, setTracks] = React.useState<MediaStreamTrack[]>([]);
   const [file, setFile] = React.useState<FileWithUrl | null>(null);
   const [loadingStream, setLoadingStream] = React.useState(false);
   const [streamError, setStreamError] = React.useState<MediaStreamError>({ isError: false });
-  const [recorderErrro, setRecorderError] = React.useState<TMediaRecorderError>({ isError: false });
+  const [recorderError, setRecorderError] = React.useState<TMediaRecorderError>({ isError: false });
+  const [trackError, setTrackError] = React.useState<MediaTrackError>({ isError: false });
   const [recordingName, setRecordingName] = React.useState<string>('');
   const [isPauseRecording, setIsPauseRecording] = React.useState(false);
   const [startTimer, setStartTimer] = React.useState(false);
@@ -38,6 +48,13 @@ export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDevicePr
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
   const audioContextRef = React.useRef<AudioContext | null>(null);
+
+  const getDefaultDevice = React.useMemo(() => {
+    if (defaultDeviceId) {
+      return devices.find((device) => device.deviceId === defaultDeviceId);
+    }
+    return defaultDevice;
+  }, [defaultDeviceId, defaultDevice, devices]);
 
   const cleanup = React.useCallback(() => {
     if (streamRef.current) {
@@ -78,6 +95,9 @@ export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDevicePr
         },
       });
       streamRef.current = _stream;
+
+      const audioTracks = _stream.getAudioTracks();
+      setTracks(audioTracks);
 
       const mediaRecorder = new MediaRecorder(_stream, {
         mimeType: 'audio/webm',
@@ -207,6 +227,7 @@ export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDevicePr
     setStartTimer(false);
     setRecordingStatus('RECORDED');
     setIsPauseRecording(false);
+    setTrackError({ isError: false });
     toast.info('Recording stopped');
   }, []);
 
@@ -235,6 +256,56 @@ export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDevicePr
     };
   }, []);
 
+  React.useEffect(() => {
+    if (recordingStatus !== 'RECORDING') return;
+
+    if (tracks.length === 0) {
+      setTrackError({ isError: true, type: 'NO_TRACKS_FOUND' });
+      return;
+    }
+
+    const track = tracks[0];
+    if (track.muted) {
+      setTrackError({ isError: true, type: 'TRACK_MUTED' });
+    }
+
+    if (!track.enabled) {
+      setTrackError({ isError: true, type: 'TRACK_DISABLED' });
+    }
+
+    if (track.readyState === 'ended') {
+      setTrackError({ isError: true, type: 'TRACK_ENDED' });
+    }
+
+    function handleTrackEnded() {
+      // Which means track.readyState = "ended"
+      console.log('Track ended - from listener');
+    }
+    function handleTrackMuted() {
+      setTrackError({ isError: true, type: 'TRACK_MUTED' });
+    }
+    function handleTrackUnmuted() {
+      setTrackError((curr) => {
+        if (curr.isError && curr.type === 'TRACK_MUTED') {
+          return { isError: false };
+        }
+        return curr;
+      });
+    }
+
+    track.addEventListener('ended', handleTrackEnded);
+    track.addEventListener('mute', handleTrackMuted);
+    track.addEventListener('unmute', handleTrackUnmuted);
+
+    return () => {
+      if (track) {
+        track.removeEventListener('ended', handleTrackEnded);
+        track.removeEventListener('mute', handleTrackMuted);
+        track.removeEventListener('unmute', handleTrackUnmuted);
+      }
+    };
+  }, [tracks, recordingStatus]);
+
   useBlocker({
     shouldBlockFn: () => {
       if (recordingStatus === 'RECORDING' || recordingStatus === 'RECORDED') {
@@ -250,8 +321,8 @@ export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDevicePr
     return <MicrophoneError type={streamError.type} />;
   }
 
-  if (recorderErrro.isError) {
-    return <MediaRecorderError type={recorderErrro.type} />;
+  if (recorderError.isError) {
+    return <MediaRecorderError type={recorderError.type} />;
   }
 
   if (recordingStatus === 'RECORDED') {
@@ -329,6 +400,14 @@ export function MicrophoneDevices({ devices, defaultDevice }: MicrophoneDevicePr
               <AudioWaveform analyserNode={analyserNode} isPaused={isPauseRecording} />
             </div>
           </div>
+          {trackError.isError && trackError.type === 'TRACK_MUTED' && (
+            <div className='bg-yellow-50 mt-3 px-3 py-2 text-sm rounded-xl border-yellow-200 border'>
+              <p className='text-yellow-600 flex items-start justify-start gap-2'>
+                <TriangleAlert className='w-full max-w-[16px] relative -top-0.5' />
+                The selected device - {getDefaultDevice?.label} is muted, Please unmute to capture the audio.
+              </p>
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <div className='grid grid-cols-2 gap-2 w-full'>

@@ -1,4 +1,4 @@
-## ⚛️ React + Vite Sass kit
+## ⚛️ Mediastream permissions
 A simple, flexible and batteries-included starter template to kickstart your React projects with ease.
 
 #### The Stack includes

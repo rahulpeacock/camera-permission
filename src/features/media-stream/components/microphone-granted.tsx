@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { SemiCircularLoader } from '@/features/global/components/loader';
 import { getMicrophoneDevicesOptions } from '@/lib/queries';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,7 +28,7 @@ export function MicrophoneGranted() {
     return (
       <MicrophoneGrantedLayout>
         <CardContent>
-          <div className='min-h-14 flex items-center justify-center gap-2.5 bg-gray-100 rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
+          <div className='min-h-[62px] flex items-center justify-center gap-2.5 bg-gray-100 rounded-2xl border-2 border-dotted text-muted-foreground text-sm'>
             <SemiCircularLoader className='size-4' /> <p>Getting devices...</p>
           </div>
         </CardContent>
@@ -42,21 +42,31 @@ export function MicrophoneGranted() {
   }
 
   if (isError) {
-    console.log('Error: ', error);
-    return (
-      <MicrophoneGrantedLayout>
-        <p>Error</p>
-      </MicrophoneGrantedLayout>
-    );
+    console.log('Error getting microphone devices: ', error);
+    return <ErrorLayout />;
   }
 
   if (data.isErr()) {
-    return (
-      <MicrophoneGrantedLayout>
-        <p>isError</p>
-      </MicrophoneGrantedLayout>
-    );
+    return <ErrorLayout />;
   }
 
   return <MicrophoneDevices devices={data.value} defaultDevice={data.value[0]} />;
+}
+
+function ErrorLayout() {
+  return (
+    <Card className='relative w-full max-w-[560px] bg-gray-50 rounded-3xl'>
+      <CardHeader>
+        <CardTitle>
+          <h2 className='font-semibold text-lg'>Error Retrieving Devices</h2>
+        </CardTitle>
+        <CardDescription>
+          <p className='text-muted-foreground text-sm'>
+            The browser couldn't show your microphone because permission isn't granted, the site isn't secure (HTTPS), or your browser doesn't support
+            it.
+          </p>
+        </CardDescription>
+      </CardHeader>
+    </Card>
+  );
 }
